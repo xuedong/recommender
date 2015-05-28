@@ -1,1 +1,1 @@
-# recommender_system
+# This is a recommender system project.
