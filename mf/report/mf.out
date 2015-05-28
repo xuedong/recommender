@@ -1,0 +1,13 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Le mod\350le}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Un peu de maths}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Algorithmes d'apprentissage}{section.2}% 4
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Descente de gradient stochastique}{subsection.2.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.2.2}{Moindres carr\351s}{subsection.2.2}% 6
+\BOOKMARK [2][-]{subsection.2.3}{Am\351liorations}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.3.1}{Ajout des biais}{subsection.2.3}% 8
+\BOOKMARK [3][-]{subsubsection.2.3.2}{Des entr\351es suppl\351mentaires}{subsection.2.3}% 9
+\BOOKMARK [3][-]{subsubsection.2.3.3}{Dynamiques temporelles}{subsection.2.3}% 10
+\BOOKMARK [3][-]{subsubsection.2.3.4}{Des entr\351es avec des niveaux de confidence vari\351s}{subsection.2.3}% 11
+\BOOKMARK [1][-]{section.3}{Les r\351sultats}{}% 12
+\BOOKMARK [1][-]{section.4}{Conclusion}{}% 13

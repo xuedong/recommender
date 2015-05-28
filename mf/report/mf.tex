@@ -1,0 +1,147 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{amssymb,amsfonts,amsthm,amsmath}
+\usepackage{fullpage}
+\usepackage[pdftex]{graphicx}
+\usepackage[francais]{babel}
+\usepackage{fourier}
+
+\usepackage{makeidx}
+
+%\usepackage[plain]{algorithm}   
+%\usepackage[noend]{algorithmic} 
+
+\usepackage{hyperref}
+
+\newcommand\institute[1]{\large \textbf{#1}}
+
+\newenvironment{clef}
+{\description\item[Mots-cl\'es.]}
+{\enddescription}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{exemple}[theorem]{Exemple}
+
+\begin{document}
+
+\title{Factorisation matricielle pour la recommendation\cite{Koren09}}
+
+\author{Xuedong Shang}
+
+\date\today
+
+\maketitle
+
+\tableofcontents
+
+\begin{abstract}
+La soci\'et\'e Netflix a organis\'e en 2007 une comp\'etition de recommandation mettant en jeu un million de dollars, afin de trouver le meilleur algorithme permettant de pr\'edire au mieux le vote des utilisateurs. Cet article nous a propos\'e donc une r\'ealisation assez puissante autour de cet \'ev\'enement. Il s'agit d'une m\'ethode de factorisation qui cherche \`a extraire des variables latentes \`a la fois pour les utilisateurs et pour les produits.
+  
+\begin{clef}
+  Apprentissage, factorisation matricielle, filtrage collaboratif, descente de gradient stochastique, moindres carr\'es.
+\end{clef}
+\end{abstract}
+
+\section{Introduction}
+Le probl\`eme de recommandation consiste, pour un utilisateur donn\'e, \`a pr\'edire son score pour une certaine liste d'articles, afin que le revendeur puisse lui donner une recommandation personnalis\'ee.
+
+Il existe principalement deux grandes classes d'approches pour le probl\`eme de recommandation. Les premi\`eres sont les approches orient\'ees contenu qui consistent \`a recommander des articles proches \`a ceux pr\'ec\'edemment appr\'eci\'es par les utilisateurs donn\'es. L'inconv\'enient important de cette approche est que des informations externes sont n\'ecessaires mais sont parfois pas facile \`a trouver.
+
+Une approche alternative est celle de type filtrage collaboratif. Il s'agit de recommander \`a un utilisateur donn\'e des articles que d'autres utilisateurs ont appr\'eci\'es. Dans notre article, nous allons nous concentrer sur l'une des m\'ethodes classiques qui fait partie de type collaboritif, dite factorisation matricielle. Nous allons d'abord d\'ecrire le mod\`ele de base et des algorithmes d'apprentissage utilis\'es. Ensuite, on va essayer d'am\'eliorer la performance de notre mod\`ele en y rajoutant des informations suppl\'ementaires.
+
+\section{Le mod\`ele}
+L'id\'ee principale de la factorisation matricielle est tr\`es intuitive, c'est-\`a-dire de trouver deux matrices dont la multiplication est \'egale \`a la matrice originelle. Cela nous permet de trouver des variables latentes cach\'ees entre deux diff\'erents objets, dans notre cas, \c ca sera les utilisateurs et les articles. Ces variables latentes jouent des diff\'erents r\^oles lorsque un utilisateur choisit son article. Par exemple, deux utilisateurs qui sont fans du m\^eme acteur auront probablement la tendance \`a donner un score remarquable au m\^eme film.
+
+\subsection{Un peu de maths}
+Passons maintenant \`a des choses plus th\'eoriques.
+
+Supposons que l'on dispose d'une matrice de scores $R$, un ensemble d'utilisateurs $U$ et un ensemble d'articles $I$. Supposons aussi que l'on dispose d'un ensemble de variables latentes $F$. Notre objectif est donc de trouver deux matrice $P$, correspondant aux utilisateurs, et $Q$, correspondant aux articles, $P$ sera de taille $|U|\times|F|$, et $Q$ sera de taille $|I|\times|F|$ telles que:
+\[
+\hat{R}=P\times Q^T\approx{R}
+\]
+
+Ainsi la pr\'ediction du vote de l'article $q_i$ donn\'e par l'utilisateur $p_u$ est tout simplement le produit scalaire des vectors associ\'es \`a $p_u$ et $q_i$:
+\[
+\hat{r}_{ui}=p_u^T q_i
+\]
+
+Dans des travaux pr\'ecedents, on utilise souvent l'imputation pour remplir la matrice creus\'ee, mais cela peut causer des surapprentissages. Donc, dans notre mod\`ele, on ne va utiliser que des donn\'ees effectives, en y rajoutant un terme de r\'egularisation pour \'eviter la surapprentissage. Ainsi on cherche \`a minimiser l'erreur quadratique moyenne:
+\[
+\sum_{(u,i)\in\kappa}(r_{ui}-\sum_{f=1}^{F}p_{uf}q_{fi})^2+\lambda(||p_u||^2+||q_i||^2)
+\]
+
+Ici, $\kappa$ d\'esigne l'ensemble des couples $(u,i)$ o\`u $r_{ui}$ est connu. Le terme de r\'egularisation est souvent determin\'ee par la validation crois\'ee.
+
+\subsection{Algorithmes d'apprentissage}
+Il y a deux m\'ethodes pour minimiser l'\'equation pr\'ec\'edente.
+
+\subsubsection{Descente de gradient stochastique}
+La descente de gradient stochastique est l'approche plus populaire pour minimiser notre fonctionnelle.
+
+On pose $e_{ui}^2=(r_{ui}-\sum_{f=1}^{F}p_{uf}q_{fi})^2+\lambda\sum_{f=1}^{F}(||p_{uf}||^2+||q_{fi}||^2)$. Pour minimiser l'erreur, il faut d\'ecider dans quelle direction on va modifier la valeur de $p_{uf}$ et $q_{fi}$, ainsi on doit calculer les d\'eriv\'ees partielles de l'expression pr\'ec\'edente par rapport \`a chaque variable $p_{uf}$ et $q_{fi}$. On a:
+\[
+\frac{\partial}{\partial p_{uf}}e_{ui}^2=-2(r_{ui}-\hat{r}_{ui})(q_{fi})+2\lambda p_{uf}=-2e_{ui}q_{fi}+2\lambda p_{uf}
+\]
+\[
+\frac{\partial}{\partial q_{fi}}e_{ui}^2=-2(r_{ui}-\hat{r}_{ui})(p_{uf})+2\lambda q_{fi}=-2e_{ui}p_{uf}+2\lambda q_{fi}
+\]
+
+Par cons\'equent, on met \`a jour les variables $p_{uf}$ et $q_{fi}$ dans la direction oppos\'ee \`a celle du gradient avec un pas $\gamma$:
+\[
+p_{uf}\leftarrow p_{uf}+\gamma(e_{ui}q_{fi}-\lambda p_{uf})
+\]
+\[
+q_{fi}\leftarrow q_{fi}+\gamma(e_{ui}p_{uf}-\lambda q_{fi})
+\]
+
+\subsubsection{Moindres carr\'es}
+Un algorithme alternatif est d'appliquer l'algorithme des moindres carr\'es par rapport aux $p_u$ en fixant les $q_i$, puis \'echanger leur r\^oles et appliquer de nouveau cet algorithme.
+
+Cette approche est particuli\`erement efficace lorsque la parall\'elisation est appliqu\'ee ou quand il s'agit d'une matrice de votes non creus\'ee.
+
+\subsection{Am\'eliorations}
+La factorisation matricielle est une approche assez flexible, c'est-\`a-dire que l'on peut y rajouter des diff\'erents aspects de donn\'ees afin qu'elle puisse s'adapter \`a des diff\'erentes applications.
+
+\subsubsection{Ajout des biais}
+Le premier \'el\'ement que l'on va \'etudier sont des biais. Les biais sont des facteurs qui ne concernent soit les utilisateurs, soit les produits. 
+
+Prenons un exemple pour illustrer cette notion. Disons que la note moyenne de tous les films sur Netflix est 3/5. Le film Titanic est un film qui est consid\'er\'e comme un bon film, donc recevra en g\'en\'eral une note plus haute que la moyenne, disons que 3,5/5, ainsi le 0,5 est le biais pour cet article. D'autre c\^ot\'e, moi je suis un spectateur strict, je donne souvent 1 point de moins que la moyenne, ainsi le 1 est le biais pour moi en tant que utilisateur. Par cons\'equent, la note que je donne \`a Titanic sera $3+0,5-1=2,5$.
+
+On peut formaliser ce propos facilement. Posons $\mu$ la moyenne globale, $b_{i}$ le biais pour l'article $i$, $b_{u}$ pour l'utilisateur $u$, alors la nouvelle note approch\'ee sera donn\'ee par la formule suivante:
+\[
+\hat{r}_{ui}=\mu+b_{i}+b_{u}+p_u^T q_i
+\]
+
+La nouvelle fonctionnelle \`a minimiser devient donc:
+\[
+\sum_{(u,i)\in\kappa}(r_{ui}-\mu-b_i-b_u-\sum_{f=1}^{F}p_{uf}q_{fi})^2+\lambda(||p_u||^2+||q_i||^2+b_i^2+b_u^2)
+\]
+
+\subsubsection{Des entr\'ees suppl\'ementaires}
+\`A venir.
+
+\subsubsection{Dynamiques temporelles}
+\`A venir.
+
+\subsubsection{Des entr\'ees avec des niveaux de confidence vari\'es}
+\`A venir.
+
+\section{Les r\'esultats}
+\`A venir.
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+
+\bibliography{mf}
+
+\end{document}

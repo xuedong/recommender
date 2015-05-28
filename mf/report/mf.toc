@@ -1,0 +1,14 @@
+\select@language {french}
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
+\contentsline {section}{\numberline {2}Le mod\`ele}{2}{section.2}
+\contentsline {subsection}{\numberline {2.1}Un peu de maths}{2}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Algorithmes d'apprentissage}{2}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.2.1}Descente de gradient stochastique}{2}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2}Moindres carr\'es}{3}{subsubsection.2.2.2}
+\contentsline {subsection}{\numberline {2.3}Am\'eliorations}{3}{subsection.2.3}
+\contentsline {subsubsection}{\numberline {2.3.1}Ajout des biais}{3}{subsubsection.2.3.1}
+\contentsline {subsubsection}{\numberline {2.3.2}Des entr\'ees suppl\'ementaires}{3}{subsubsection.2.3.2}
+\contentsline {subsubsection}{\numberline {2.3.3}Dynamiques temporelles}{3}{subsubsection.2.3.3}
+\contentsline {subsubsection}{\numberline {2.3.4}Des entr\'ees avec des niveaux de confidence vari\'es}{3}{subsubsection.2.3.4}
+\contentsline {section}{\numberline {3}Les r\'esultats}{3}{section.3}
+\contentsline {section}{\numberline {4}Conclusion}{3}{section.4}
